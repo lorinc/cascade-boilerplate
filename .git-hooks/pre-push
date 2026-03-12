@@ -1,0 +1,103 @@
+#!/bin/bash
+# Pre-push hook for comprehensive checks
+# Install: ln -s ../../.git-hooks/pre-push .git/hooks/pre-push
+
+set -e
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}Running pre-push checks...${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo ""
+
+# Check if pushing to main directly
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" = "main" ]; then
+  echo -e "${RED}❌ Error: Cannot push directly to main${NC}"
+  echo -e "${YELLOW}Create a feature/fix branch and open a PR${NC}"
+  exit 1
+fi
+
+# Check if exploration branch
+if [[ $BRANCH == explore/* ]]; then
+  echo -e "${RED}❌ Error: Cannot push exploration branch${NC}"
+  echo -e "${YELLOW}Exploration branches are local only${NC}"
+  echo -e "${YELLOW}Create a clean implementation branch instead${NC}"
+  exit 1
+fi
+
+# Run all tests
+echo -e "${GREEN}Running all tests...${NC}"
+if [ -f "package.json" ]; then
+  npm run test 2>&1 | tail -n 20
+  
+  if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo -e "${RED}❌ Tests failed${NC}"
+    exit 1
+  fi
+fi
+
+# Check code coverage
+echo ""
+echo -e "${GREEN}Checking code coverage...${NC}"
+if [ -f "package.json" ]; then
+  COVERAGE=$(npm run test:coverage --silent 2>&1 | grep -E "All files.*[0-9]+\.[0-9]+" | awk '{print $4}' | sed 's/%//')
+  
+  if [ ! -z "$COVERAGE" ]; then
+    if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+      echo -e "${RED}❌ Coverage too low: ${COVERAGE}% (minimum 80%)${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}✅ Coverage: ${COVERAGE}%${NC}"
+    fi
+  fi
+fi
+
+# Check for security vulnerabilities
+echo ""
+echo -e "${GREEN}Checking for security vulnerabilities...${NC}"
+if [ -f "package.json" ]; then
+  npm audit --audit-level=high 2>&1 | tail -n 10
+  
+  if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo -e "${YELLOW}⚠️  Security vulnerabilities found${NC}"
+    echo -e "${YELLOW}   Run 'npm audit fix' to resolve${NC}"
+    # Don't fail on vulnerabilities, just warn
+  fi
+fi
+
+# Check if branch is up to date with main
+echo ""
+echo -e "${GREEN}Checking if branch is up to date...${NC}"
+git fetch origin main --quiet
+
+BEHIND=$(git rev-list --count HEAD..origin/main)
+if [ $BEHIND -gt 0 ]; then
+  echo -e "${YELLOW}⚠️  Branch is $BEHIND commits behind main${NC}"
+  echo -e "${YELLOW}   Consider rebasing: git rebase origin/main${NC}"
+fi
+
+# Build check
+echo ""
+echo -e "${GREEN}Checking build...${NC}"
+if [ -f "package.json" ]; then
+  if grep -q "\"build\":" package.json; then
+    npm run build --silent 2>&1 | tail -n 5
+    
+    if [ ${PIPESTATUS[0]} -ne 0 ]; then
+      echo -e "${RED}❌ Build failed${NC}"
+      exit 1
+    fi
+  fi
+fi
+
+echo ""
+echo -e "${BLUE}========================================${NC}"
+echo -e "${GREEN}✅ All pre-push checks passed${NC}"
+echo -e "${BLUE}========================================${NC}"
+exit 0

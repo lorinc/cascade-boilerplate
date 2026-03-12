@@ -1,0 +1,37 @@
+# <type>: <short summary> (max 72 chars)
+#
+# <detailed explanation of what and why>
+#
+# Root cause: <what caused the issue>
+# Solution: <how this fixes it>
+# Alternatives considered: <other approaches and why rejected>
+#
+# Fixes: #<issue-number>
+
+# ============================================================================
+# Types:
+#   fix:      Bug fix
+#   feat:     New feature
+#   refactor: Code restructuring (no behavior change)
+#   test:     Add or update tests
+#   docs:     Documentation only
+#   perf:     Performance improvement
+#   chore:    Build, dependencies, tooling
+#   style:    Code style/formatting (no logic change)
+#   ci:       CI/CD configuration
+#
+# Example:
+# fix: Prevent duplicate participant sessions from same fingerprint
+#
+# Root cause: Fingerprint hash collision check was case-sensitive,
+# allowing same fingerprint with different casing to create multiple
+# sessions.
+#
+# Solution: Normalize fingerprint hash to lowercase before comparison
+# and storage. Add unique constraint on lowercase(fingerprint_hash).
+#
+# Alternatives considered: Client-side normalization - rejected because
+# it's not enforceable and creates security risk.
+#
+# Fixes: #156
+# ============================================================================

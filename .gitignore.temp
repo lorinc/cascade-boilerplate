@@ -1,0 +1,58 @@
+# This .gitignore is for DOWNSTREAM projects that clone this boilerplate
+# It prevents the boilerplate files from appearing in their repositories
+# BUT it does NOT prevent these files from being tracked in the boilerplate repo itself
+
+# Cascade boilerplate files (will be ignored in downstream projects)
+/.windsurf/
+/.cascade/
+/.git-hooks/
+/.github/workflows/quality-checks.yml
+/.github/pull_request_template.md
+/.gitmessage
+/.eslintrc.js
+/.prettierrc.js
+/docs/DEVELOPMENT_DISCIPLINE.md
+/docs/WINDSURF_HOWTO.md
+/docs/QUICK_REFERENCE.md
+
+# Note: This file itself will also be ignored in downstream projects
+# so they can have their own .gitignore
+/.gitignore
+
+# Common Node.js ignores (useful for any project)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.test
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.EXPLORING

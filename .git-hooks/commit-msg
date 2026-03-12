@@ -1,0 +1,76 @@
+#!/bin/bash
+# Commit message validation hook
+# Install: ln -s ../../.git-hooks/commit-msg .git/hooks/commit-msg
+
+set -e
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip merge commits
+if echo "$COMMIT_MSG" | grep -q "^Merge"; then
+  exit 0
+fi
+
+# Check commit message format
+echo "Validating commit message..."
+
+# Check for type prefix
+if ! echo "$COMMIT_MSG" | grep -qE "^(fix|feat|refactor|test|docs|perf|chore|style|ci):"; then
+  echo -e "${RED}❌ Invalid commit message format${NC}"
+  echo -e "${YELLOW}Commit message must start with a type:${NC}"
+  echo -e "  fix:      Bug fix"
+  echo -e "  feat:     New feature"
+  echo -e "  refactor: Code restructuring"
+  echo -e "  test:     Add or update tests"
+  echo -e "  docs:     Documentation only"
+  echo -e "  perf:     Performance improvement"
+  echo -e "  chore:    Build, dependencies, tooling"
+  echo ""
+  echo -e "${YELLOW}Example:${NC}"
+  echo -e "  fix: Prevent duplicate participant sessions"
+  exit 1
+fi
+
+# Check subject line length (first line)
+SUBJECT=$(echo "$COMMIT_MSG" | head -n1)
+SUBJECT_LENGTH=${#SUBJECT}
+
+if [ $SUBJECT_LENGTH -gt 72 ]; then
+  echo -e "${RED}❌ Subject line too long (${SUBJECT_LENGTH} chars, max 72)${NC}"
+  echo -e "${YELLOW}Keep the first line under 72 characters${NC}"
+  exit 1
+fi
+
+if [ $SUBJECT_LENGTH -lt 10 ]; then
+  echo -e "${RED}❌ Subject line too short (${SUBJECT_LENGTH} chars, min 10)${NC}"
+  echo -e "${YELLOW}Provide a meaningful description${NC}"
+  exit 1
+fi
+
+# Check for imperative mood (common mistakes)
+if echo "$SUBJECT" | grep -qE "^(fix|feat|refactor|test|docs|perf|chore): (Fixed|Added|Updated|Changed|Removed)"; then
+  echo -e "${YELLOW}⚠️  Use imperative mood in subject line${NC}"
+  echo -e "${YELLOW}   Use 'Fix' not 'Fixed', 'Add' not 'Added'${NC}"
+fi
+
+# Encourage detailed commit messages
+LINE_COUNT=$(echo "$COMMIT_MSG" | wc -l)
+if [ $LINE_COUNT -lt 3 ]; then
+  echo -e "${YELLOW}⚠️  Consider adding a detailed explanation${NC}"
+  echo -e "${YELLOW}   Include root cause and solution approach${NC}"
+fi
+
+# Check for issue reference
+if ! echo "$COMMIT_MSG" | grep -qE "(Fixes|Closes|Refs|Related to): #[0-9]+"; then
+  echo -e "${YELLOW}⚠️  No issue reference found${NC}"
+  echo -e "${YELLOW}   Consider adding: Fixes: #123${NC}"
+fi
+
+echo -e "${GREEN}✅ Commit message validated${NC}"
+exit 0

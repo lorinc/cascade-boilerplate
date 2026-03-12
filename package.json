@@ -1,0 +1,48 @@
+{
+  "name": "cascade-boilerplate",
+  "version": "1.0.0",
+  "description": "Development discipline framework for Cascade/Windsurf IDE",
+  "private": false,
+  "scripts": {
+    "hooks:install": "bash .git-hooks/install.sh",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "format:check": "prettier --check 'src/**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "test": "echo 'Add your test command here'",
+    "test:unit": "echo 'Add your unit test command here'",
+    "test:integration": "echo 'Add your integration test command here'",
+    "test:e2e": "echo 'Add your E2E test command here'",
+    "test:coverage": "echo 'Add your coverage command here'",
+    "pre-commit": "npm run lint && npm run test:unit",
+    "pre-push": "npm run test && npm run test:coverage",
+    "quality:check": "npm run lint && npm run format:check && npm run test:coverage",
+    "quality:fix": "npm run lint:fix && npm run format"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "cascade",
+    "windsurf",
+    "development-discipline",
+    "code-quality",
+    "git-hooks",
+    "tdd",
+    "clean-code"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lorinc/cascade-boilerplate.git"
+  },
+  "author": "",
+  "license": "MIT"
+}
